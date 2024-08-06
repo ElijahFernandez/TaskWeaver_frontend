@@ -8,12 +8,24 @@ const ChatComponent = () => {
 
   const handleSend = async () => {
     if (message.trim()) {
+      const userMessage = message;
+      setResponses([...responses, { user: userMessage, bot: '...' }]);
+      setMessage('');
+
       try {
-        const response = await axios.post('http://localhost:5000/chat', { message });
-        setResponses([...responses, { user: message, bot: response.data.message }]);
-        setMessage('');
+        const response = await axios.post('http://localhost:5000/chat', { message: userMessage });
+        setResponses(prevResponses => {
+          const updatedResponses = [...prevResponses];
+          updatedResponses[updatedResponses.length - 1].bot = response.data.message;
+          return updatedResponses;
+        });
       } catch (error) {
         console.error('Error sending message:', error);
+        setResponses(prevResponses => {
+          const updatedResponses = [...prevResponses];
+          updatedResponses[updatedResponses.length - 1].bot = 'Error: Unable to get a response';
+          return updatedResponses;
+        });
       }
     }
   };
